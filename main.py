@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from pydantic import RootModel
 from merge import deep_merge
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 
 # Log Setup
@@ -132,6 +133,23 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
         },
     )
 
+
+@app.exception_handler(StarletteHTTPException)
+async def starlette_http_exception_handler(request: Request, exc: StarletteHTTPException):
+    corr_id = request.headers.get("aplm-correlation-id")
+    logger.warning(
+        f"{exc.status_code} http_error path={request.url.path} corr_id={corr_id} detail={exc.detail}"
+    )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": {
+                "code": "http_error",
+                "message": str(exc.detail),
+                "correlation_id": corr_id,
+            }
+        },
+    )
 
 # Helpers
 
