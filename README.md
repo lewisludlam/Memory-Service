@@ -128,7 +128,7 @@ Running the Service
 
 Install with:
 
-`pip install -r requirements-dev.txt`
+`pip install -r requirements.txt`
 
 ### Start the server
 
